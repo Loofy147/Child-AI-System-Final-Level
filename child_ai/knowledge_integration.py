@@ -12,10 +12,7 @@ from .logic_engine import Predicate, Constant, Rule
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    print("Downloading spaCy model 'en_core_web_sm'...")
-    from spacy.cli import download
-    download("en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
+    raise OSError("spaCy model 'en_core_web_sm' not found. Please run 'python -m spacy download en_core_web_sm' to install it.")
 
 class TextKnowledgeExtractor:
     """Extracts knowledge from text using NLP techniques."""

@@ -4,8 +4,8 @@ This module defines the REST API endpoints for interacting with the Child AI.
 """
 
 from flask import Blueprint, request, jsonify
-from ..logic_engine import Predicate, Constant, Variable, Rule
-from ..extensions import logic_engine, knowledge_integrator
+from ..logic_engine import Predicate, Constant, Variable, Rule, DefaultRule
+from ..extensions import logic_engine
 import re
 
 ai_bp = Blueprint('ai', __name__)
@@ -80,6 +80,22 @@ def add_rule():
     except Exception as e:
         return jsonify({'error': f"Failed to parse or add rule: {e}"}), 400
 
+@ai_bp.route('/rules/default', methods=['POST'])
+def add_default_rule():
+    """Add a new default rule to the knowledge base."""
+    data = request.get_json()
+    if not data or 'premise' not in data or 'conclusion' not in data:
+        return jsonify({'error': "Missing 'premise' or 'conclusion' in request body."}), 400
+
+    try:
+        premise = parse_predicate(data['premise'])
+        conclusion = parse_predicate(data['conclusion'])
+        rule = DefaultRule(premise, conclusion)
+        logic_engine.add_default_rule(rule)
+        return jsonify({'message': f"Default rule '{rule}' added successfully."}), 201
+    except Exception as e:
+        return jsonify({'error': f"Failed to parse or add default rule: {e}"}), 400
+
 @ai_bp.route('/query', methods=['POST'])
 def query_knowledge():
     """Query the knowledge base using backward chaining."""
@@ -93,17 +109,6 @@ def query_knowledge():
         return jsonify({'query': str(query), 'result': result})
     except Exception as e:
         return jsonify({'error': f"Failed to parse or execute query: {e}"}), 400
-
-@ai_bp.route('/infer', methods=['POST'])
-def infer_all_facts():
-    """Run forward chaining to infer all possible facts."""
-    logic_engine.infer_all()
-    new_facts = [str(f) for f in logic_engine.derived_facts]
-    return jsonify({
-        'message': 'Inference complete.',
-        'newly_derived_facts': sorted(new_facts),
-        'total_facts': len(logic_engine.get_all_facts())
-    })
 
 # Initialize with some default knowledge for demonstration
 def add_initial_knowledge():

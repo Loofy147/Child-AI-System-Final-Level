@@ -6,13 +6,12 @@ def test_add_fact():
     engine.add_fact(fact)
     assert fact in engine.get_all_facts()
 
-def test_add_rule_and_infer():
+def test_add_rule_and_query():
     engine = LogicEngine()
     x = Variable("x")
     engine.add_fact(Predicate("Human", (Constant("Socrates"),)))
     engine.add_rule(Rule(Predicate("Human", (x,)), Predicate("Mortal", (x,))))
-    engine.infer_all()
-    assert Predicate("Mortal", (Constant("Socrates"),)) in engine.get_all_facts()
+    assert engine.query(Predicate("Mortal", (Constant("Socrates"),))) == True
 
 def test_query():
     engine = LogicEngine()

@@ -10,6 +10,12 @@ def create_app(config_name):
     app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
     app.config.from_object(config[config_name])
 
+    # Ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
     db.init_app(app)
 
     with app.app_context():
