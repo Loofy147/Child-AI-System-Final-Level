@@ -1,0 +1,179 @@
+"""
+Learning and Adaptation Module for Child AI
+This module implements continuous learning mechanisms, a data-driven rule
+induction system, and a more robust performance evaluation framework.
+"""
+
+import os
+import json
+from collections import defaultdict
+from datetime import datetime
+from dataclasses import dataclass
+from typing import Dict, List, Any, Tuple
+from .logic_engine import Predicate, Rule, Constant, Variable
+from .knowledge_integration import TextKnowledgeExtractor
+
+# --- Data Structures for Learning ---
+
+@dataclass
+class LearningExample:
+    """Represents a feedback instance for learning."""
+    input_text: str
+    output_predicate: Predicate
+    feedback: bool # True for positive, False for negative
+
+# --- Rule Induction Engine ---
+
+class RuleInductionEngine:
+    """Induces logical rules from a collection of learning examples."""
+
+    def induce_rules(self, examples: List[LearningExample]) -> List[Rule]:
+        """
+        Induces rules by finding common patterns in positive examples.
+        A simple data-driven approach: if a common subject/object relationship
+        appears often, propose a rule.
+        """
+        positive_examples = [ex for ex in examples if ex.feedback]
+
+        # Pattern: Predicate1(A, B) and Predicate2(A, C) -> Rule(Predicate1(x, y), Predicate2(x, z))
+        # This is a placeholder for a more advanced inductive logic programming (ILP) algorithm.
+
+        # For now, we'll implement a simple version that looks for co-occurring predicates
+        # with a shared subject.
+
+        subject_predicates = defaultdict(lambda: defaultdict(int))
+
+        for ex in positive_examples:
+            # Assumes binary predicates for simplicity
+            if len(ex.output_predicate.terms) == 2:
+                subject = ex.output_predicate.terms[0]
+                predicate_name = ex.output_predicate.name
+                subject_predicates[subject][predicate_name] += 1
+
+        # Propose rules from frequent patterns
+        induced_rules = []
+        for subject, predicates in subject_predicates.items():
+            if len(predicates) > 1:
+                # If a subject has multiple predicates, propose a rule
+                # between the most and second-most common.
+                sorted_preds = sorted(predicates.items(), key=lambda item: item[1], reverse=True)
+
+                premise_name = sorted_preds[0][0]
+                conclusion_name = sorted_preds[1][0]
+
+                # Create a general rule
+                x = Variable("x")
+                y1 = Variable("y1")
+                y2 = Variable("y2")
+
+                rule = Rule(
+                    premise=Predicate(premise_name, (x, y1)),
+                    conclusion=Predicate(conclusion_name, (x, y2))
+                )
+                induced_rules.append(rule)
+
+        return induced_rules
+
+# --- Performance Evaluator ---
+
+class PerformanceEvaluator:
+    """Evaluates the performance of the AI system based on feedback."""
+
+    def evaluate(self, examples: List[LearningExample]) -> Dict[str, Any]:
+        """Generates a performance report from a list of learning examples."""
+        if not examples:
+            return {'accuracy': 0, 'positive_feedback': 0, 'total_examples': 0}
+
+        total = len(examples)
+        positive = sum(1 for ex in examples if ex.feedback)
+
+        accuracy = positive / total if total > 0 else 0
+
+        return {
+            'accuracy': accuracy,
+            'positive_feedback': positive,
+            'total_examples': total
+        }
+
+# --- Main Learning Module ---
+
+class LearningModule:
+    """Main learning and adaptation module."""
+
+    def __init__(self, logic_engine):
+        self.logic_engine = logic_engine
+        self.examples: List[LearningExample] = []
+        self.rule_inductor = RuleInductionEngine()
+        self.evaluator = PerformanceEvaluator()
+        self.text_extractor = TextKnowledgeExtractor()
+
+    def learn_from_feedback(self, input_text: str, output_str: str, feedback: bool):
+        """Processes a single instance of feedback."""
+        try:
+            # Use the text extractor to get a structured representation
+            predicates = self.text_extractor.extract(output_str)
+            if not predicates:
+                return # Cannot learn without a structured output
+
+            output_predicate = predicates[0]
+
+            example = LearningExample(input_text, output_predicate, feedback)
+            self.examples.append(example)
+
+            # If feedback is positive, add the predicate as a fact
+            if feedback:
+                self.logic_engine.add_fact(output_predicate)
+
+        except Exception as e:
+            print(f"Error processing feedback: {e}")
+
+    def run_learning_cycle(self):
+        """Runs a full learning cycle: induce rules and evaluate."""
+        print("Running learning cycle...")
+
+        # 1. Induce new rules from the collected examples
+        new_rules = self.rule_inductor.induce_rules(self.examples)
+
+        # 2. Add high-confidence rules to the knowledge base
+        for rule in new_rules:
+            # A more advanced system would check for redundancy and confidence
+            print(f"  - Adding new rule: {rule}")
+            self.logic_engine.add_rule(rule)
+
+        # 3. Evaluate overall performance
+        report = self.evaluator.evaluate(self.examples)
+        print(f"  - Performance report: {report}")
+
+        return {
+            'new_rules_induced': len(new_rules),
+            'performance': report
+        }
+
+# --- Example Usage ---
+if __name__ == "__main__":
+    from .logic_engine import LogicEngine
+
+    engine = LogicEngine()
+    learning_module = LearningModule(engine)
+
+    # Simulate some positive feedback
+    learning_module.learn_from_feedback("Socrates is a human", "Human(Socrates)", True)
+    learning_module.learn_from_feedback("Socrates is mortal", "Mortal(Socrates)", True)
+    learning_module.learn_from_feedback("Plato is a human", "Human(Plato)", True)
+
+    # Simulate some negative feedback
+    learning_module.learn_from_feedback("Socrates is a cat", "Cat(Socrates)", False)
+
+    # Run a learning cycle
+    learning_cycle_results = learning_module.run_learning_cycle()
+
+    print("\n--- Final State ---")
+    print("Facts in KB:")
+    for fact in engine.get_all_facts():
+        print(f"- {fact}")
+
+    print("\nRules in KB:")
+    for rule in engine.knowledge_base.get_rules():
+        print(f"- {rule}")
+
+    print(f"\nLearning cycle summary: {learning_cycle_results}")

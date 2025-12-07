@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child AI - Mathematical Logic System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background-color: #48bb78;
+            animation: pulse 2s infinite;
+        }
+
+        .status-inactive {
+            background-color: #f56565;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .result-area {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .fact-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            background: #f7fafc;
+        }
+
+        .fact-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+            font-size: 13px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: #e53e3e;
+            background: #fed7d7;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: #38a169;
+            background: #c6f6d5;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Child AI</h1>
+            <p>Mathematical Logic & Knowledge Integration System</p>
+        </div>
+
+        <!-- Status Dashboard -->
+        <div class="dashboard">
+            <div class="card">
+                <h3><span class="status-indicator status-active"></span>System Status</h3>
+                <div id="systemStatus">Loading...</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalFacts">-</span>
+                        <span class="stat-label">Facts</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalRules">-</span>
+                        <span class="stat-label">Rules</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="derivedFacts">-</span>
+                        <span class="stat-label">Derived</span>
+                    </div>
+                </div>
+                <button class="btn" onclick="refreshStatus()">Refresh Status</button>
+            </div>
+
+            <div class="card">
+                <h3>📚 Knowledge Base</h3>
+                <div class="fact-list" id="factsList">Loading facts...</div>
+                <button class="btn" onclick="loadFacts()">Refresh Facts</button>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('query')">Query</div>
+                <div class="tab" onclick="switchTab('learn')">Learn</div>
+                <div class="tab" onclick="switchTab('integrate')">Integrate</div>
+            </div>
+
+            <!-- Query Tab -->
+            <div id="queryTab" class="tab-content active">
+                <h3>🔍 Query Knowledge Base</h3>
+                <div class="input-group">
+                    <label for="queryInput">Enter your query:</label>
+                    <input type="text" id="queryInput" placeholder="e.g., Mortal(Socrates)" />
+                </div>
+                <button class="btn" onclick="queryKnowledge()">
+                    <span id="queryLoading" class="loading hidden"></span>
+                    Query
+                </button>
+                <div id="queryResult" class="result-area"></div>
+            </div>
+
+            <!-- Learn Tab -->
+            <div id="learnTab" class="tab-content">
+                <h3>🎓 Learning Interface</h3>
+                <div class="input-group">
+                    <label for="learnInput">Input Text:</label>
+                    <input type="text" id="learnInput" placeholder="e.g., Socrates is a human" />
+                </div>
+                <div class="input-group">
+                    <label for="learnOutput">Output Predicate:</label>
+                    <input type="text" id="learnOutput" placeholder="e.g., Human(Socrates)" />
+                </div>
+                <div class="input-group">
+                    <label for="learnFeedback">Feedback:</label>
+                    <select id="learnFeedback">
+                        <option value="true">Positive/Correct</option>
+                        <option value="false">Negative/Incorrect</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="submitFeedback()">
+                    <span id="learnLoading" class="loading hidden"></span>
+                    Submit Feedback
+                </button>
+                <button class="btn btn-secondary" onclick="runLearningCycle()">Run Learning Cycle</button>
+                <div id="learnResult" class="result-area"></div>
+            </div>
+
+            <!-- Integrate Tab -->
+            <div id="integrateTab" class="tab-content">
+                <h3>🔗 Knowledge Integration</h3>
+                <div class="input-group">
+                    <label for="integrateType">Integration Type:</label>
+                    <select id="integrateType" onchange="toggleIntegrateInput()">
+                        <option value="fact">Single Fact</option>
+                        <option value="rule">Logical Rule</option>
+                    </select>
+                </div>
+
+                <div id="factIntegrate">
+                    <div class="input-group">
+                        <label for="integrateFact">Fact:</label>
+                        <input type="text" id="integrateFact" placeholder="e.g., Human(Aristotle)" />
+                    </div>
+                </div>
+
+                <div id="ruleIntegrate" class="hidden">
+                    <div class="input-group">
+                        <label for="integratePremise">Premise:</label>
+                        <input type="text" id="integratePremise" placeholder="e.g., Human(x)" />
+                    </div>
+                    <div class="input-group">
+                        <label for="integrateConclusion">Conclusion:</label>
+                        <input type="text" id="integrateConclusion" placeholder="e.g., Mortal(x)" />
+                    </div>
+                </div>
+
+                <button class="btn" onclick="integrateKnowledge()">
+                    <span id="integrateLoading" class="loading hidden"></span>
+                    Integrate
+                </button>
+                <div id="integrateResult" class="result-area"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTab = 'query';
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStatus();
+            loadFacts();
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+            currentTab = tabName;
+        }
+
+        // API helper function
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const loadingIndicator = document.getElementById(`${currentTab}Loading`);
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+
+            try {
+                const options = {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (data) options.body = JSON.stringify(data);
+
+                const response = await fetch(endpoint, options);
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.error || 'API call failed');
+
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                const resultArea = document.getElementById(`${currentTab}Result`);
+                if (resultArea) resultArea.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                throw error;
+            } finally {
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        // Status functions
+        async function refreshStatus() {
+            try {
+                const status = await apiCall('/api/ai/status');
+                document.getElementById('systemStatus').innerHTML = `<strong>Status:</strong> ${status.status}`;
+                document.getElementById('totalFacts').textContent = status.logic_engine.total_facts;
+                document.getElementById('totalRules').textContent = status.logic_engine.total_rules;
+                document.getElementById('derivedFacts').textContent = status.logic_engine.derived_facts;
+            } catch (error) { /* Handled in apiCall */ }
+        }
+
+        async function loadFacts() {
+            try {
+                const response = await apiCall('/api/ai/facts');
+                const factsList = document.getElementById('factsList');
+                factsList.innerHTML = response.facts.length ?
+                    response.facts.map(fact => `<div class="fact-item">${fact}</div>`).join('') :
+                    '<div class="fact-item">No facts in knowledge base</div>';
+            } catch (error) { /* Handled in apiCall */ }
+        }
+
+        // Query functions
+        async function queryKnowledge() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return alert('Please enter a query');
+
+            try {
+                const response = await apiCall('/api/ai/query', 'POST', { query });
+                document.getElementById('queryResult').innerHTML = `Query: ${response.query}\nResult: <strong>${response.result ? 'TRUE' : 'FALSE'}</strong>`;
+            } catch (error) { /* Handled in apiCall */ }
+        }
+
+        // Learning functions
+        async function submitFeedback() {
+            const input_text = document.getElementById('learnInput').value.trim();
+            const output_str = document.getElementById('learnOutput').value.trim();
+            const feedback = document.getElementById('learnFeedback').value === 'true';
+
+            if (!input_text || !output_str) return alert('Please fill in all learning fields');
+
+            try {
+                const response = await apiCall('/api/learning/feedback', 'POST', { input_text, output_str, feedback });
+                document.getElementById('learnResult').innerHTML = `<div class="success">${response.message}</div>`;
+                document.getElementById('learnInput').value = '';
+                document.getElementById('learnOutput').value = '';
+            } catch (error) { /* Handled in apiCall */ }
+        }
+
+        async function runLearningCycle() {
+            try {
+                const response = await apiCall('/api/learning/run-cycle', 'POST');
+                document.getElementById('learnResult').innerHTML = `<strong>Learning Cycle Complete:</strong>\n${JSON.stringify(response, null, 2)}`;
+            } catch (error) { /* Handled in apiCall */ }
+        }
+
+        // Integration functions
+        function toggleIntegrateInput() {
+            const type = document.getElementById('integrateType').value;
+            document.getElementById('factIntegrate').classList.toggle('hidden', type !== 'fact');
+            document.getElementById('ruleIntegrate').classList.toggle('hidden', type !== 'rule');
+        }
+
+        async function integrateKnowledge() {
+            const type = document.getElementById('integrateType').value;
+            let response;
+            try {
+                if (type === 'fact') {
+                    const fact = document.getElementById('integrateFact').value.trim();
+                    if (!fact) return alert('Please enter a fact');
+                    response = await apiCall('/api/ai/facts', 'POST', { fact });
+                } else if (type === 'rule') {
+                    const premise = document.getElementById('integratePremise').value.trim();
+                    const conclusion = document.getElementById('integrateConclusion').value.trim();
+                    if (!premise || !conclusion) return alert('Please enter both premise and conclusion');
+                    response = await apiCall('/api/ai/rules', 'POST', { premise, conclusion });
+                }
+                document.getElementById('integrateResult').innerHTML = `<div class="success">${response.message}</div>`;
+                loadFacts();
+                refreshStatus();
+            } catch (error) { /* Handled in apiCall */ }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                if (currentTab === 'query') queryKnowledge();
+                else if (currentTab === 'learn') submitFeedback();
+                else if (currentTab === 'integrate') integrateKnowledge();
+            }
+        });
+    </script>
+</body>
+</html>
