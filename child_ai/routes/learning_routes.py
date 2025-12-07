@@ -40,11 +40,3 @@ def get_performance_report():
     """Get the latest performance report."""
     report = learning_module.evaluator.evaluate(learning_module.examples)
     return jsonify(report)
-
-# Add some initial data to make the API testable
-def add_initial_learning_data():
-    learning_module.learn_from_feedback("Socrates is a human", "Human(Socrates)", True)
-    learning_module.learn_from_feedback("Socrates is mortal", "Mortal(Socrates)", True)
-    learning_module.learn_from_feedback("Plato is a human", "Human(Plato)", True)
-
-add_initial_learning_data()

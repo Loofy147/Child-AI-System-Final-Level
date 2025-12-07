@@ -8,6 +8,9 @@ def test_status(client):
     assert data['status'] == 'active'
 
 def test_get_facts(client):
+    # First, add a fact to ensure the DB is not empty
+    client.post('/api/ai/facts', data=json.dumps({'fact': 'Human(Socrates)'}), content_type='application/json')
+
     response = client.get('/api/ai/facts')
     assert response.status_code == 200
     data = json.loads(response.data)
@@ -33,6 +36,22 @@ def test_add_default_rule(client):
 
     # Query the conclusion
     response = client.post('/api/ai/query', data=json.dumps({'query': 'Flies(Tweety)'}), content_type='application/json')
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['result'] == True
+
+def test_temporal_query(client):
+    # Add temporal facts
+    client.post('/api/ai/facts', data=json.dumps({'fact': 'HappensAt(Login(UserA), 100)'}), content_type='application/json')
+    client.post('/api/ai/facts', data=json.dumps({'fact': 'HappensAt(Logout(UserA), 200)'}), content_type='application/json')
+
+    # Query the temporal relationship
+    response = client.post('/api/ai/query/temporal', data=json.dumps({
+        'operator': 'Before',
+        'event1': 'Login(UserA)',
+        'event2': 'Logout(UserA)'
+    }), content_type='application/json')
+
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['result'] == True
