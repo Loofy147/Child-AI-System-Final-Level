@@ -1,25 +1,16 @@
-.cache/
-.config/
-.local/
-.logs/
-.npm/
-.nvm/
-.pki/
-.secrets/
-.user_env
-child_ai/venv/
-*.zip
-sandbox.txt
-upload/
-ziey56w0
-zizst0tB
-child_ai_repository.zip
-.bash_history
-.bash_logout
-.bashrc
-.browser_data_dir/
-.env
-.gitconfig
-.lesshst
-.profile
-.zshrc
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Database
+*.db
+*.sqlite3
+
+# IDEs
+.idea/
+.vscode/
