@@ -18,7 +18,14 @@ class TextKnowledgeExtractor:
     """Extracts knowledge from text using NLP techniques."""
 
     def extract(self, text: str) -> List[Predicate]:
-        """Extracts predicates from text using NER and dependency parsing."""
+        """Extracts predicates from text using NER and dependency parsing.
+
+        Args:
+            text: The input text.
+
+        Returns:
+            A list of predicates extracted from the text.
+        """
         doc = nlp(text)
         predicates = []
 
@@ -45,12 +52,25 @@ class KnowledgeIntegrator:
     """Main class for integrating knowledge from various sources."""
 
     def __init__(self, logic_engine):
+        """Initializes the KnowledgeIntegrator.
+
+        Args:
+            logic_engine: The logic engine to use for knowledge integration.
+        """
         self.logic_engine = logic_engine
         self.text_extractor = TextKnowledgeExtractor()
         self.integration_log: List[Dict[str, Any]] = []
 
     def integrate_text(self, text: str, source_name: str = "manual_input") -> int:
-        """Integrate knowledge from text."""
+        """Integrate knowledge from text.
+
+        Args:
+            text: The input text.
+            source_name: The name of the source of the text.
+
+        Returns:
+            The number of predicates integrated from the text.
+        """
         predicates = self.text_extractor.extract(text)
 
         for pred in predicates:
@@ -67,6 +87,9 @@ class KnowledgeIntegrator:
         """
         Identify and resolve conflicts in the knowledge base.
         This is a more advanced placeholder that looks for contradictory predicates.
+
+        Returns:
+            A list of dictionaries, where each dictionary represents a conflict.
         """
         conflicts = []
         all_facts = self.logic_engine.get_all_facts()

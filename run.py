@@ -1,3 +1,4 @@
+"""This module is the main entry point for the Child AI system."""
 from child_ai.main import create_app
 from manage import create_cli
 import os
